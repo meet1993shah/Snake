@@ -3,11 +3,7 @@ An App for a game of Snake
 
 ## Sample Screenshots
 
-![Initial Screen](./example_images/initial_screen.png)
-
 ![Game Play](./example_images/game_play.png)
-
-![Game Over](./example_images/game_over.png)
 
 ## Android APP
 

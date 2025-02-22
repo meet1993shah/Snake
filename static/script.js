@@ -4,15 +4,31 @@ const ctx = canvas.getContext("2d");
 canvas.width = 400;
 canvas.height = 400;
 
-const box = 20;
+const box = 20;  // Head size
+const bodyBox = 15;  // Smaller body segments
 let snake = [{ x: 200, y: 200 }];
 let direction = "RIGHT";
-let food = { x: Math.floor(Math.random() * (canvas.width / box)) * box, y: Math.floor(Math.random() * (canvas.height / box)) * box };
 let score = 0;
 let speed = 100;
 
-document.addEventListener("keydown", changeDirection);
+// More fruit emojis for variety
+const fruits = ["🍎", "🍌", "🍒", "🍊", "🍇", "🍓", "🍍", "🥝", "🍉", "🥭"];
+let currentFruit = fruits[Math.floor(Math.random() * fruits.length)];
+let food = { x: randomPosition(), y: randomPosition() };
 
+let touchStartX = 0;
+let touchStartY = 0;
+
+// Add both keyboard and touch event listeners
+document.addEventListener("keydown", changeDirection);
+canvas.addEventListener("touchstart", startTouch, false);
+canvas.addEventListener("touchend", endTouch, false);
+
+function randomPosition() {
+    return Math.floor(Math.random() * (canvas.width / box)) * box;
+}
+
+// Handle keyboard inputs for controlling direction
 function changeDirection(event) {
     const keyPressed = event.keyCode;
     if (keyPressed === 37 && direction !== "RIGHT") direction = "LEFT";
@@ -21,18 +37,68 @@ function changeDirection(event) {
     else if (keyPressed === 40 && direction !== "UP") direction = "DOWN";
 }
 
+// Handle touch events for swipe controls
+function startTouch(event) {
+    touchStartX = event.changedTouches[0].pageX;
+    touchStartY = event.changedTouches[0].pageY;
+}
+
+function endTouch(event) {
+    let touchEndX = event.changedTouches[0].pageX;
+    let touchEndY = event.changedTouches[0].pageY;
+
+    let diffX = touchEndX - touchStartX;
+    let diffY = touchEndY - touchStartY;
+
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+        // Horizontal swipe (left or right)
+        if (diffX > 0 && direction !== "LEFT") {
+            direction = "RIGHT";
+        } else if (diffX < 0 && direction !== "RIGHT") {
+            direction = "LEFT";
+        }
+    } else {
+        // Vertical swipe (up or down)
+        if (diffY > 0 && direction !== "UP") {
+            direction = "DOWN";
+        } else if (diffY < 0 && direction !== "DOWN") {
+            direction = "UP";
+        }
+    }
+}
+
 function drawGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw Snake
-    ctx.fillStyle = "lime";
-    snake.forEach(part => {
-        ctx.fillRect(part.x, part.y, box, box);
-    });
 
-    // Draw Food
-    ctx.fillStyle = "red";
-    ctx.fillRect(food.x, food.y, box, box);
+    // Draw Snake with realistic head and smaller body segments
+    for (let i = 0; i < snake.length; i++) {
+        if (i === 0) {
+            // Head with eyes and tongue
+            ctx.fillStyle = "limegreen";
+            ctx.beginPath();
+            ctx.arc(snake[i].x + box / 2, snake[i].y + box / 2, box / 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Eyes
+            ctx.fillStyle = "black";
+            ctx.beginPath();
+            ctx.arc(snake[i].x + box / 3, snake[i].y + box / 3, 2, 0, Math.PI * 2);
+            ctx.arc(snake[i].x + (2 * box) / 3, snake[i].y + box / 3, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Tongue
+            ctx.fillStyle = "red";
+            ctx.fillRect(snake[i].x + box / 2 - 2, snake[i].y + box, 4, 6);
+        } else {
+            // Smaller body segments (rectangles), fully connected
+            ctx.fillStyle = "green";
+            ctx.fillRect(snake[i].x, snake[i].y, bodyBox, bodyBox); // Smaller body segments, connected
+        }
+    }
+
+    // Draw Fruit Emoji
+    ctx.font = `${box}px Arial`;
+    ctx.fillText(currentFruit, food.x, food.y + box - 2);
 
     // Move Snake
     let newX = snake[0].x;
@@ -48,8 +114,11 @@ function drawGame() {
     // Check collision with food
     if (newX === food.x && newY === food.y) {
         score += 10;
-        food = { x: Math.floor(Math.random() * (canvas.width / box)) * box, y: Math.floor(Math.random() * (canvas.height / box)) * box };
         speed = Math.max(50, speed - 5); // Increase speed
+
+        // Generate new food position & type
+        food = { x: randomPosition(), y: randomPosition() };
+        currentFruit = fruits[Math.floor(Math.random() * fruits.length)];
     } else {
         snake.pop(); // Remove last tail segment
     }
