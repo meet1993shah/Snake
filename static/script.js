@@ -19,10 +19,10 @@ let food = { x: randomPosition(), y: randomPosition() };
 let touchStartX = 0;
 let touchStartY = 0;
 
-// Add both keyboard and touch event listeners
+// Add both keyboard and global touch event listeners
 document.addEventListener("keydown", changeDirection);
-canvas.addEventListener("touchstart", startTouch, false);
-canvas.addEventListener("touchend", endTouch, false);
+document.addEventListener("touchstart", startTouch, false);
+document.addEventListener("touchend", endTouch, false);
 
 function randomPosition() {
     return Math.floor(Math.random() * (canvas.width / box)) * box;
@@ -39,8 +39,8 @@ function changeDirection(event) {
 
 // Handle touch events for swipe controls
 function startTouch(event) {
-    touchStartX = event.changedTouches[0].pageX;
-    touchStartY = event.changedTouches[0].pageY;
+    touchStartX = event.touches[0].pageX;
+    touchStartY = event.touches[0].pageY;
 }
 
 function endTouch(event) {
