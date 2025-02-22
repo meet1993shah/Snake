@@ -2,7 +2,7 @@
 
 # (str) Title of your application
 title = Snake Game
-g
+
 # (str) Package name
 package.name = Snake
 
